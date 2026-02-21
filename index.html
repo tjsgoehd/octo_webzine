@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Guide Webzine - Admin</title>
+    <!-- CSS Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        #editor-container {
+            height: 500px;
+            background: white;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+        .ql-toolbar {
+            background: #f3f4f6;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+
+        .post-card {
+            transition: transform 0.2s;
+        }
+        .post-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .content-area img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 20px auto;
+            display: block;
+        }
+        .content-area p { margin-bottom: 1rem; line-height: 1.8; }
+        
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 9999;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+<div id="loading-overlay">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+    <p id="loading-text" class="mt-4 font-bold text-gray-700">데이터 처리 중...</p>
+</div>
+
+<div id="app" class="max-w-5xl mx-auto px-4 py-8">
+    <header class="flex justify-between items-center mb-12 border-b pb-6">
+        <h1 class="text-3xl font-bold text-gray-800 cursor-pointer" id="logo">🎮 GAME <span class="text-green-600">GUIDE</span></h1>
+        <nav>
+            <button id="btn-write" class="hidden bg-green-600 text-white px-6 py-2 rounded-full font-bold hover:bg-green-700 transition">공략 쓰기</button>
+        </nav>
+    </header>
+
+    <section id="view-list" class="view">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="post-grid"></div>
+    </section>
+
+    <section id="view-detail" class="view hidden">
+        <button id="btn-back-list" class="mb-6 text-gray-500 hover:text-gray-800 flex items-center">← 목록으로 돌아가기</button>
+        <article class="bg-white p-6 md:p-12 rounded-xl shadow-sm border border-gray-100">
+            <h2 id="detail-title" class="text-3xl font-bold mb-6"></h2>
+            <div id="detail-meta" class="text-sm text-gray-400 mb-10 pb-4 border-b"></div>
+            <div id="detail-content" class="content-area text-gray-800 text-lg"></div>
+        </article>
+    </section>
+
+    <section id="view-write" class="view hidden">
+        <div class="bg-white p-4 md:p-8 rounded-xl shadow-md border border-gray-100">
+            <h2 class="text-2xl font-bold mb-6">새 공략 작성하기</h2>
+            <input type="text" id="post-title" placeholder="제목을 입력하세요" class="w-full text-2xl font-bold mb-6 p-2 border-b-2 border-gray-100 focus:border-green-500 outline-none">
+            
+            <div id="editor-container"></div>
+            <input type="file" id="image-input" class="hidden" accept="image/*">
+
+            <div class="mt-8 flex justify-end gap-3">
+                <button id="btn-cancel-write" class="px-6 py-2 text-gray-500 hover:bg-gray-100 rounded-lg">취소</button>
+                <button id="btn-save-post" class="px-10 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 shadow-lg">공략 발행</button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Quill Script -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<!-- Firebase Modular SDK -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAjbApqAPhrZXcnR2P_xd-nvrZOvZp67CI",
+        authDomain: "octopath-85851.firebaseapp.com",
+        projectId: "octopath-85851",
+        storageBucket: "octopath-85851.firebasestorage.app",
+        messagingSenderId: "744016190979",
+        appId: "1:744016190979:web:fbc5badeda2e24f5f47836",
+        measurementId: "G-T66TC51C7W"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const auth = getAuth(app);
+    const appId = "octopath-85851";
+
+    let currentUser = null;
+    let quill;
+
+    // UI Helpers
+    function showLoading(show, text = "처리 중...") {
+        const overlay = document.getElementById('loading-overlay');
+        document.getElementById('loading-text').innerText = text;
+        overlay.style.display = show ? 'flex' : 'none';
+    }
+
+    function updateLoadingText(text) {
+        document.getElementById('loading-text').innerText = text;
+    }
+
+    // Navigation
+    window.showView = (viewName) => {
+        document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+        document.getElementById(`view-${viewName}`).classList.remove('hidden');
+        if (viewName === 'list') fetchPosts();
+    };
+
+    // Quill Setup
+    function initQuill() {
+        if (typeof Quill === 'undefined') {
+            setTimeout(initQuill, 100);
+            return;
+        }
+        quill = new Quill('#editor-container', {
+            theme: 'snow',
+            placeholder: '상세 공략을 입력하세요...',
+            modules: {
+                toolbar: {
+                    container: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline'],
+                        ['image', 'link', 'code-block'],
+                        ['clean']
+                    ],
+                    handlers: { image: imageHandler }
+                }
+            }
+        });
+    }
+
+    // Image Upload
+    async function imageHandler() {
+        if (!currentUser) {
+            alert("로그인 세션이 유효하지 않습니다. 다시 시도해 주세요.");
+            return;
+        }
+        
+        const input = document.getElementById('image-input');
+        input.value = ""; 
+        input.click();
+        
+        input.onchange = async () => {
+            const file = input.files[0];
+            if (!file) return;
+
+            showLoading(true, "업로드 시작 중...");
+            try {
+                const timestamp = Date.now();
+                const safeName = file.name.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
+                // 경로: /artifacts/{appId}/public/data/images/...
+                const storagePath = `artifacts/${appId}/public/data/images/${timestamp}_${safeName}`;
+                const storageRef = ref(storage, storagePath);
+                
+                const uploadTask = uploadBytesResumable(storageRef, file);
+                
+                uploadTask.on('state_changed', 
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        updateLoadingText(`업로드 진행률: ${Math.round(progress)}%`);
+                    }, 
+                    (error) => {
+                        console.error("Storage Error:", error);
+                        alert(`업로드 실패: ${error.code}\n파이어베이스 Storage 규칙이 올바른지 확인하세요.`);
+                        showLoading(false);
+                    }, 
+                    async () => {
+                        const url = await getDownloadURL(uploadTask.snapshot.ref);
+                        const range = quill.getSelection(true);
+                        quill.insertEmbed(range.index, 'image', url);
+                        quill.setSelection(range.index + 1);
+                        showLoading(false);
+                    }
+                );
+            } catch (error) {
+                console.error("Critical Upload Error:", error);
+                showLoading(false);
+            }
+        };
+    }
+
+    // Data Fetching
+    async function fetchPosts() {
+        showLoading(true, "목록 로드 중...");
+        const grid = document.getElementById('post-grid');
+        grid.innerHTML = '';
+        try {
+            const postsRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
+            const q = query(postsRef, orderBy('createdAt', 'desc'));
+            const snapshot = await getDocs(q);
+            
+            snapshot.forEach(docSnap => {
+                const post = docSnap.data();
+                const div = document.createElement('div');
+                div.className = "post-card bg-white p-6 rounded-xl shadow-sm border border-gray-100 cursor-pointer";
+                div.onclick = () => {
+                    document.getElementById('detail-title').innerText = post.title;
+                    document.getElementById('detail-meta').innerText = `작성일: ${post.date}`;
+                    document.getElementById('detail-content').innerHTML = post.content;
+                    window.showView('detail');
+                };
+                div.innerHTML = `
+                    <h3 class="text-xl font-bold mb-3 text-gray-800 line-clamp-1">${post.title}</h3>
+                    <p class="text-gray-500 text-sm mb-4 line-clamp-2">${post.plainText || ''}</p>
+                    <div class="flex justify-between items-center text-xs text-gray-400 border-t pt-4">
+                        <span>관리자</span>
+                        <span>${post.date}</span>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+        } catch (err) { console.error(err); }
+        finally { showLoading(false); }
+    }
+
+    // Event Listeners
+    document.getElementById('logo').onclick = () => window.showView('list');
+    document.getElementById('btn-write').onclick = () => window.showView('write');
+    document.getElementById('btn-back-list').onclick = () => window.showView('list');
+    document.getElementById('btn-cancel-write').onclick = () => window.showView('list');
+    document.getElementById('btn-save-post').onclick = async () => {
+        const title = document.getElementById('post-title').value;
+        const content = quill.root.innerHTML;
+        if (!title || quill.getText().trim().length < 2) return alert('내용을 입력하세요.');
+        
+        showLoading(true, "저장 중...");
+        try {
+            const postsRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
+            await addDoc(postsRef, {
+                title, content, plainText: quill.getText().substring(0, 150),
+                date: new Date().toLocaleDateString('ko-KR'),
+                createdAt: serverTimestamp()
+            });
+            document.getElementById('post-title').value = '';
+            quill.setContents([]);
+            window.showView('list');
+        } catch (err) { alert("저장 실패"); console.error(err); }
+        finally { showLoading(false); }
+    };
+
+    // Initialize
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = user;
+            document.getElementById('btn-write').classList.remove('hidden');
+            fetchPosts();
+        } else {
+            signInAnonymously(auth);
+        }
+    });
+    initQuill();
+</script>
+
+</body>
+</html>
