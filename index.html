@@ -89,6 +89,7 @@
             <input type="text" id="post-title" placeholder="제목을 입력하세요" class="w-full text-2xl font-bold mb-6 p-2 border-b-2 border-gray-100 focus:border-green-500 outline-none">
             
             <div id="editor-container"></div>
+            <!-- 파일 입력창 (기존 Storage 로직 대신 Base64 로직 연결) -->
             <input type="file" id="image-input" class="hidden" accept="image/*">
 
             <div class="mt-8 flex justify-end gap-3">
@@ -106,7 +107,6 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -121,32 +121,23 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const storage = getStorage(app);
     const auth = getAuth(app);
-    const appId = "octopath-85851";
 
     let currentUser = null;
     let quill;
 
-    // UI Helpers
     function showLoading(show, text = "처리 중...") {
         const overlay = document.getElementById('loading-overlay');
         document.getElementById('loading-text').innerText = text;
         overlay.style.display = show ? 'flex' : 'none';
     }
 
-    function updateLoadingText(text) {
-        document.getElementById('loading-text').innerText = text;
-    }
-
-    // Navigation
     window.showView = (viewName) => {
         document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
         document.getElementById(`view-${viewName}`).classList.remove('hidden');
         if (viewName === 'list') fetchPosts();
     };
 
-    // Quill Setup
     function initQuill() {
         if (typeof Quill === 'undefined') {
             setTimeout(initQuill, 100);
@@ -169,14 +160,8 @@
         });
     }
 
-    // Image Upload
+    // [중요 수정] Storage를 쓰지 않고 Base64로 이미지를 인코딩하여 본문에 삽입
     async function imageHandler() {
-        if (!currentUser) {
-            alert("로그인 세션이 유효하지 않습니다. 잠시만 기다려 주세요.");
-            await signInAnonymously(auth);
-            return;
-        }
-        
         const input = document.getElementById('image-input');
         input.value = ""; 
         input.click();
@@ -185,50 +170,38 @@
             const file = input.files[0];
             if (!file) return;
 
-            showLoading(true, "이미지 업로드 중 (0%)");
-            try {
-                const timestamp = Date.now();
-                const safeName = file.name.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
-                
-                // Storage 규칙의 match 경로와 정확히 일치해야 합니다: /artifacts/{appId}/public/data/...
-                const storagePath = `artifacts/${appId}/public/data/images/${timestamp}_${safeName}`;
-                const storageRef = ref(storage, storagePath);
-                
-                const uploadTask = uploadBytesResumable(storageRef, file);
-                
-                uploadTask.on('state_changed', 
-                    (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        updateLoadingText(`업로드 진행률: ${Math.round(progress)}%`);
-                    }, 
-                    (error) => {
-                        console.error("Storage Error Details:", error);
-                        alert(`업로드 실패: ${error.code}\n파이어베이스 Storage 규칙 탭에서 규칙이 정상적으로 '게시'되었는지 확인하세요.`);
-                        showLoading(false);
-                    }, 
-                    async () => {
-                        const url = await getDownloadURL(uploadTask.snapshot.ref);
-                        const range = quill.getSelection(true);
-                        quill.insertEmbed(range.index, 'image', url);
-                        quill.setSelection(range.index + 1);
-                        showLoading(false);
-                    }
-                );
-            } catch (error) {
-                console.error("Critical Upload Error:", error);
-                showLoading(false);
+            // 파일 크기 체크 (Firestore 문서 용량 제한 1MB를 고려하여 가이드)
+            if (file.size > 800000) { // 약 0.8MB
+                alert("무료 버전 최적화를 위해 이미지는 1MB 이하의 파일만 권장합니다.");
+                return;
             }
+
+            showLoading(true, "이미지 처리 중...");
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                const range = quill.getSelection(true);
+                const base64Data = e.target.result;
+                quill.insertEmbed(range.index, 'image', base64Data);
+                quill.setSelection(range.index + 1);
+                showLoading(false);
+            };
+            
+            reader.onerror = () => {
+                alert("이미지 처리 실패");
+                showLoading(false);
+            };
+            
+            reader.readAsDataURL(file);
         };
     }
 
-    // Data Fetching
     async function fetchPosts() {
-        showLoading(true, "목록 로드 중...");
+        showLoading(true, "목록 로딩 중...");
         const grid = document.getElementById('post-grid');
         grid.innerHTML = '';
         try {
-            // Firestore 규칙의 match 경로와 일치: /artifacts/{appId}/public/data/posts
-            const postsRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
+            const postsRef = collection(db, 'posts');
             const q = query(postsRef, orderBy('createdAt', 'desc'));
             const snapshot = await getDocs(q);
             
@@ -259,19 +232,19 @@
         }
     }
 
-    // Event Listeners
     document.getElementById('logo').onclick = () => window.showView('list');
     document.getElementById('btn-write').onclick = () => window.showView('write');
     document.getElementById('btn-back-list').onclick = () => window.showView('list');
     document.getElementById('btn-cancel-write').onclick = () => window.showView('list');
+    
     document.getElementById('btn-save-post').onclick = async () => {
         const title = document.getElementById('post-title').value;
         const content = quill.root.innerHTML;
         if (!title || quill.getText().trim().length < 2) return alert('내용을 입력하세요.');
         
-        showLoading(true, "저장 중...");
+        showLoading(true, "발행 중...");
         try {
-            const postsRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
+            const postsRef = collection(db, 'posts');
             await addDoc(postsRef, {
                 title, content, plainText: quill.getText().substring(0, 150),
                 date: new Date().toLocaleDateString('ko-KR'),
@@ -281,21 +254,20 @@
             quill.setContents([]);
             window.showView('list');
         } catch (err) { 
-            alert("저장 실패: Firestore 규칙을 확인하세요."); 
+            alert("저장 실패: Firestore 규칙을 확인하거나 이미지 크기를 줄여주세요."); 
             console.error(err); 
         } finally { 
             showLoading(false); 
         }
     };
 
-    // Initialize
     onAuthStateChanged(auth, (user) => {
         if (user) {
             currentUser = user;
             document.getElementById('btn-write').classList.remove('hidden');
             fetchPosts();
         } else {
-            signInAnonymously(auth).catch(err => console.error("Anonymous Auth Failed:", err));
+            signInAnonymously(auth);
         }
     });
     initQuill();
