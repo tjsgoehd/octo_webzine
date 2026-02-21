@@ -3,51 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Guide Webzine - Admin</title>
+    <title>Game Guide Webzine - Font Restored</title>
     <!-- CSS Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <!-- 서체 로드 -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic&family=Nanum+Myeongjo&family=Noto+Sans+KR:wght@300;400;700&display=swap');
+        @font-face {
+            font-family: 'NanumBarunGothic';
+            src: url('https://cdn.jsdelivr.net/gh/nanumfont/nanumfont/NanumBarunGothic.woff') format('woff');
+        }
+        @font-face {
+            font-family: 'MaruBuri';
+            src: url('https://cdn.jsdelivr.net/gh/fontsource/maru-buri/fonts/maru-buri-korean-400-normal.woff2') format('woff2');
+        }
+
+        /* Quill 서체 클래스 정의 */
+        .ql-font-notosans { font-family: 'Noto Sans KR', sans-serif; }
+        .ql-font-nanumgothic { font-family: 'Nanum Gothic', sans-serif; }
+        .ql-font-nanummyeongjo { font-family: 'Nanum Myeongjo', serif; }
+        .ql-font-nanumbarungothic { font-family: 'NanumBarunGothic', sans-serif; }
+        .ql-font-nanumsquare { font-family: 'NanumSquare', sans-serif; }
+        .ql-font-maruburi { font-family: 'MaruBuri', serif; }
+
         body {
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Pretendard', sans-serif;
             background-color: #f8f9fa;
         }
 
         #editor-container {
-            height: 500px;
+            height: 600px;
             background: white;
             border-bottom-left-radius: 8px;
             border-bottom-right-radius: 8px;
         }
+        
         .ql-toolbar {
-            background: #f3f4f6;
+            background: #ffffff;
             border-top-left-radius: 8px;
             border-top-right-radius: 8px;
+            border-color: #e5e7eb !important;
+            padding: 12px !important;
         }
 
-        .post-card {
-            transition: transform 0.2s;
-        }
-        .post-card:hover {
-            transform: translateY(-4px);
+        .ql-editor {
+            text-align: left; 
+            font-family: 'Nanum Gothic', sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
         }
 
-        .content-area img {
+        /* 이미지 리사이징 스타일 */
+        .ql-editor img {
             max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin: 20px auto;
-            display: block;
+            cursor: pointer;
         }
-        .content-area p { margin-bottom: 1rem; line-height: 1.8; }
+
+        /* 툴바 드롭다운 한글 레이블 설정 */
+        .ql-snow .ql-picker.ql-font .ql-picker-label::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item::before { content: '서체선택'; }
         
-        #loading-overlay {
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="nanumgothic"]::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="nanumgothic"]::before { content: '나눔고딕'; font-family: 'Nanum Gothic'; }
+        
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="nanummyeongjo"]::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="nanummyeongjo"]::before { content: '나눔명조'; font-family: 'Nanum Myeongjo'; }
+        
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="nanumbarungothic"]::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="nanumbarungothic"]::before { content: '나눔바른고딕'; font-family: 'NanumBarunGothic'; }
+        
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="nanumsquare"]::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="nanumsquare"]::before { content: '나눔스퀘어'; font-family: 'NanumSquare'; }
+        
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="maruburi"]::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="maruburi"]::before { content: '마루부리'; font-family: 'MaruBuri'; }
+
+        .ql-snow .ql-picker.ql-size .ql-picker-label::before,
+        .ql-snow .ql-picker.ql-size .ql-picker-item::before { content: attr(data-value) !important; }
+        .ql-snow .ql-picker.ql-size .ql-picker-label:not([data-value])::before { content: '11pt' !important; }
+
+        .content-area { text-align: left; word-break: break-all; }
+        .content-area img { max-width: 100%; height: auto; margin: 15px 0; }
+
+        #loading-overlay, #modal-login {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(0, 0, 0, 0.7);
             z-index: 9999;
             flex-direction: column;
             align-items: center;
@@ -58,56 +104,69 @@
 <body>
 
 <div id="loading-overlay">
-    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-    <p id="loading-text" class="mt-4 font-bold text-gray-700">데이터 처리 중...</p>
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+    <p id="loading-text" class="mt-4 font-bold text-white">처리 중...</p>
+</div>
+
+<div id="modal-login">
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm">
+        <h2 class="text-2xl font-bold mb-2 text-center text-gray-800">관리자 인증</h2>
+        <input type="password" id="admin-password" placeholder="비밀번호" class="w-full p-4 border border-gray-200 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-green-500">
+        <div class="flex gap-3">
+            <button onclick="closeLoginModal()" class="flex-1 py-3 bg-gray-100 rounded-xl font-bold">취소</button>
+            <button id="btn-do-login" class="flex-1 py-3 bg-green-600 text-white rounded-xl font-bold">확인</button>
+        </div>
+    </div>
 </div>
 
 <div id="app" class="max-w-5xl mx-auto px-4 py-8">
-    <header class="flex justify-between items-center mb-12 border-b pb-6">
+    <header class="flex justify-between items-center mb-8 border-b pb-6">
         <h1 class="text-3xl font-bold text-gray-800 cursor-pointer" id="logo">🎮 GAME <span class="text-green-600">GUIDE</span></h1>
-        <nav>
-            <button id="btn-write" class="hidden bg-green-600 text-white px-6 py-2 rounded-full font-bold hover:bg-green-700 transition">공략 쓰기</button>
+        <nav class="flex gap-3">
+            <button id="btn-admin-view" class="bg-gray-800 text-white px-5 py-2 rounded-full font-bold text-sm shadow-sm hover:bg-black">ADMIN</button>
+            <button id="btn-write" class="hidden bg-green-600 text-white px-5 py-2 rounded-full font-bold text-sm shadow-md hover:bg-green-700">공략 쓰기</button>
+            <button id="btn-logout" class="hidden text-gray-400 hover:text-red-500 text-sm font-bold ml-2">로그아웃</button>
         </nav>
     </header>
 
     <section id="view-list" class="view">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="post-grid"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="post-grid"></div>
     </section>
 
     <section id="view-detail" class="view hidden">
-        <button id="btn-back-list" class="mb-6 text-gray-500 hover:text-gray-800 flex items-center">← 목록으로 돌아가기</button>
-        <article class="bg-white p-6 md:p-12 rounded-xl shadow-sm border border-gray-100">
-            <h2 id="detail-title" class="text-3xl font-bold mb-6"></h2>
-            <div id="detail-meta" class="text-sm text-gray-400 mb-10 pb-4 border-b"></div>
-            <div id="detail-content" class="content-area text-gray-800 text-lg"></div>
+        <button id="btn-back-list" class="mb-6 text-gray-500 hover:text-black font-medium">← 목록으로 돌아가기</button>
+        <article class="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+            <h2 id="detail-title" class="text-3xl font-bold mb-4"></h2>
+            <div id="detail-meta" class="text-sm text-gray-400 mb-8 pb-4 border-b"></div>
+            <div id="detail-content" class="content-area"></div>
+            <div id="admin-actions" class="hidden mt-10 pt-6 border-t flex gap-4">
+                <button id="btn-edit-post" class="text-blue-600 font-bold">수정하기</button>
+                <button id="btn-delete-post" class="text-red-500 font-bold">삭제하기</button>
+            </div>
         </article>
     </section>
 
     <section id="view-write" class="view hidden">
-        <div class="bg-white p-4 md:p-8 rounded-xl shadow-md border border-gray-100">
-            <h2 class="text-2xl font-bold mb-6">새 공략 작성하기</h2>
-            <input type="text" id="post-title" placeholder="제목을 입력하세요" class="w-full text-2xl font-bold mb-6 p-2 border-b-2 border-gray-100 focus:border-green-500 outline-none">
-            
+        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+            <input type="text" id="post-title" placeholder="제목을 입력하세요" class="w-full text-2xl font-bold mb-6 p-2 border-b-2 border-gray-100 focus:border-green-500 outline-none transition-all">
             <div id="editor-container"></div>
-            <!-- 파일 입력창 (기존 Storage 로직 대신 Base64 로직 연결) -->
             <input type="file" id="image-input" class="hidden" accept="image/*">
-
             <div class="mt-8 flex justify-end gap-3">
-                <button id="btn-cancel-write" class="px-6 py-2 text-gray-500 hover:bg-gray-100 rounded-lg">취소</button>
-                <button id="btn-save-post" class="px-10 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 shadow-lg">공략 발행</button>
+                <button id="btn-cancel-write" class="px-6 py-2 text-gray-500 font-bold">취소</button>
+                <button id="btn-save-post" class="px-10 py-2 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-all">발행하기</button>
             </div>
         </div>
     </section>
 </div>
 
-<!-- Quill Script -->
+<!-- Scripts -->
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill-image-resize-module@3.0.0/image-resize.min.js"></script>
 
-<!-- Firebase Modular SDK -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAjbApqAPhrZXcnR2P_xd-nvrZOvZp67CI",
@@ -115,163 +174,174 @@
         projectId: "octopath-85851",
         storageBucket: "octopath-85851.firebasestorage.app",
         messagingSenderId: "744016190979",
-        appId: "1:744016190979:web:fbc5badeda2e24f5f47836",
-        measurementId: "G-T66TC51C7W"
+        appId: "1:744016190979:web:fbc5badeda2e24f5f47836"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+    const ADMIN_EMAIL = "tjsgoehd@gmail.com";
 
-    let currentUser = null;
+    let isAdmin = false;
     let quill;
+    let currentPostId = null;
 
-    function showLoading(show, text = "처리 중...") {
-        const overlay = document.getElementById('loading-overlay');
-        document.getElementById('loading-text').innerText = text;
-        overlay.style.display = show ? 'flex' : 'none';
-    }
+    // --- Quill 서체 및 크기 화이트리스트 등록 ---
+    const Font = Quill.import('formats/font');
+    Font.whitelist = ['nanumgothic', 'nanummyeongjo', 'nanumbarungothic', 'nanumsquare', 'maruburi'];
+    Quill.register(Font, true);
 
-    window.showView = (viewName) => {
-        document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
-        document.getElementById(`view-${viewName}`).classList.remove('hidden');
-        if (viewName === 'list') fetchPosts();
-    };
+    const Size = Quill.import('attributors/style/size');
+    Size.whitelist = ['11pt', '13pt', '15pt', '16pt', '19pt', '24pt', '28pt', '30pt', '34pt', '38pt'];
+    Quill.register(Size, true);
 
     function initQuill() {
-        if (typeof Quill === 'undefined') {
-            setTimeout(initQuill, 100);
-            return;
-        }
         quill = new Quill('#editor-container', {
             theme: 'snow',
-            placeholder: '상세 공략을 입력하세요...',
+            placeholder: '공략 내용을 작성해 주세요...',
             modules: {
                 toolbar: {
                     container: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline'],
-                        ['image', 'link', 'code-block'],
+                        [{ 'font': Font.whitelist }],
+                        [{ 'size': Size.whitelist }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'align': [] }],
+                        ['image', 'link', 'blockquote'],
                         ['clean']
                     ],
                     handlers: { image: imageHandler }
-                }
+                },
+                imageResize: { displaySize: true }
             }
         });
+
+        // 초기 서체/크기 기본값 설정
+        quill.format('font', 'nanumgothic');
+        quill.format('size', '11pt');
     }
 
-    // [중요 수정] Storage를 쓰지 않고 Base64로 이미지를 인코딩하여 본문에 삽입
     async function imageHandler() {
         const input = document.getElementById('image-input');
-        input.value = ""; 
+        input.value = "";
         input.click();
-        
-        input.onchange = async () => {
+        input.onchange = () => {
             const file = input.files[0];
             if (!file) return;
-
-            // 파일 크기 체크 (Firestore 문서 용량 제한 1MB를 고려하여 가이드)
-            if (file.size > 800000) { // 약 0.8MB
-                alert("무료 버전 최적화를 위해 이미지는 1MB 이하의 파일만 권장합니다.");
-                return;
-            }
-
+            if (file.size > 1024 * 1024) return alert("이미지 용량이 너무 큽니다 (1MB 제한).");
+            
             showLoading(true, "이미지 처리 중...");
             const reader = new FileReader();
-            
             reader.onload = (e) => {
                 const range = quill.getSelection(true);
-                const base64Data = e.target.result;
-                quill.insertEmbed(range.index, 'image', base64Data);
+                quill.insertEmbed(range.index, 'image', e.target.result);
                 quill.setSelection(range.index + 1);
                 showLoading(false);
             };
-            
-            reader.onerror = () => {
-                alert("이미지 처리 실패");
-                showLoading(false);
-            };
-            
             reader.readAsDataURL(file);
         };
     }
 
-    async function fetchPosts() {
-        showLoading(true, "목록 로딩 중...");
-        const grid = document.getElementById('post-grid');
-        grid.innerHTML = '';
-        try {
-            const postsRef = collection(db, 'posts');
-            const q = query(postsRef, orderBy('createdAt', 'desc'));
-            const snapshot = await getDocs(q);
-            
-            snapshot.forEach(docSnap => {
-                const post = docSnap.data();
-                const div = document.createElement('div');
-                div.className = "post-card bg-white p-6 rounded-xl shadow-sm border border-gray-100 cursor-pointer";
-                div.onclick = () => {
-                    document.getElementById('detail-title').innerText = post.title;
-                    document.getElementById('detail-meta').innerText = `작성일: ${post.date}`;
-                    document.getElementById('detail-content').innerHTML = post.content;
-                    window.showView('detail');
-                };
-                div.innerHTML = `
-                    <h3 class="text-xl font-bold mb-3 text-gray-800 line-clamp-1">${post.title}</h3>
-                    <p class="text-gray-500 text-sm mb-4 line-clamp-2">${post.plainText || ''}</p>
-                    <div class="flex justify-between items-center text-xs text-gray-400 border-t pt-4">
-                        <span>관리자</span>
-                        <span>${post.date}</span>
-                    </div>
-                `;
-                grid.appendChild(div);
-            });
-        } catch (err) { 
-            console.error("Firestore Fetch Error:", err); 
-        } finally { 
-            showLoading(false); 
-        }
+    function showLoading(show, text = "") {
+        document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
+        document.getElementById('loading-text').innerText = text;
     }
 
-    document.getElementById('logo').onclick = () => window.showView('list');
-    document.getElementById('btn-write').onclick = () => window.showView('write');
-    document.getElementById('btn-back-list').onclick = () => window.showView('list');
-    document.getElementById('btn-cancel-write').onclick = () => window.showView('list');
-    
+    window.showView = (name) => {
+        document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+        document.getElementById(`view-${name}`).classList.remove('hidden');
+        if (name === 'list') fetchPosts();
+    };
+
+    async function fetchPosts() {
+        const grid = document.getElementById('post-grid');
+        grid.innerHTML = '';
+        const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+        const snap = await getDocs(q);
+        snap.forEach(d => {
+            const p = d.data();
+            const card = document.createElement('div');
+            card.className = "bg-white p-6 rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-all";
+            card.onclick = () => {
+                currentPostId = d.id;
+                document.getElementById('detail-title').innerText = p.title;
+                document.getElementById('detail-content').innerHTML = p.content;
+                document.getElementById('detail-meta').innerText = `관리자 | ${p.date || ''}`;
+                document.getElementById('admin-actions').classList.toggle('hidden', !isAdmin);
+                showView('detail');
+            };
+            card.innerHTML = `
+                <h3 class="font-bold text-lg mb-4 line-clamp-2 text-gray-800">${p.title}</h3>
+                <div class="flex items-center justify-between text-xs text-gray-400">
+                    <span>${p.date || ''}</span>
+                    <span class="text-green-600 font-bold uppercase">Guide</span>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
     document.getElementById('btn-save-post').onclick = async () => {
         const title = document.getElementById('post-title').value;
         const content = quill.root.innerHTML;
-        if (!title || quill.getText().trim().length < 2) return alert('내용을 입력하세요.');
-        
-        showLoading(true, "발행 중...");
+        if (!title || quill.getText().trim().length < 2) return alert("내용을 채워주세요.");
+
+        showLoading(true, "저장 중...");
         try {
-            const postsRef = collection(db, 'posts');
-            await addDoc(postsRef, {
-                title, content, plainText: quill.getText().substring(0, 150),
-                date: new Date().toLocaleDateString('ko-KR'),
-                createdAt: serverTimestamp()
-            });
-            document.getElementById('post-title').value = '';
-            quill.setContents([]);
-            window.showView('list');
-        } catch (err) { 
-            alert("저장 실패: Firestore 규칙을 확인하거나 이미지 크기를 줄여주세요."); 
-            console.error(err); 
-        } finally { 
-            showLoading(false); 
-        }
+            const data = { title, content, updatedAt: serverTimestamp() };
+            if (currentPostId) {
+                await updateDoc(doc(db, 'posts', currentPostId), data);
+            } else {
+                data.createdAt = serverTimestamp();
+                data.date = new Date().toLocaleDateString('ko-KR');
+                await addDoc(collection(db, 'posts'), data);
+            }
+            showView('list');
+        } catch (e) { alert("저장 실패"); }
+        finally { showLoading(false); }
     };
 
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            currentUser = user;
-            document.getElementById('btn-write').classList.remove('hidden');
-            fetchPosts();
-        } else {
-            signInAnonymously(auth);
+    document.getElementById('btn-admin-view').onclick = () => document.getElementById('modal-login').style.display = 'flex';
+    window.closeLoginModal = () => document.getElementById('modal-login').style.display = 'none';
+    document.getElementById('btn-do-login').onclick = async () => {
+        try {
+            await signInWithEmailAndPassword(auth, ADMIN_EMAIL, document.getElementById('admin-password').value);
+            closeLoginModal();
+        } catch (e) { alert("비밀번호가 틀렸습니다."); }
+    };
+    document.getElementById('btn-logout').onclick = () => signOut(auth);
+    document.getElementById('btn-write').onclick = () => {
+        currentPostId = null;
+        document.getElementById('post-title').value = '';
+        quill.setContents([]);
+        quill.format('font', 'nanumgothic');
+        quill.format('size', '11pt');
+        showView('write');
+    };
+    document.getElementById('btn-edit-post').onclick = () => {
+        document.getElementById('post-title').value = document.getElementById('detail-title').innerText;
+        quill.root.innerHTML = document.getElementById('detail-content').innerHTML;
+        showView('write');
+    };
+    document.getElementById('btn-delete-post').onclick = async () => {
+        if (confirm("삭제하시겠습니까?")) {
+            await deleteDoc(doc(db, 'posts', currentPostId));
+            showView('list');
         }
+    };
+    document.getElementById('btn-back-list').onclick = () => showView('list');
+    document.getElementById('btn-cancel-write').onclick = () => showView('list');
+    document.getElementById('logo').onclick = () => showView('list');
+
+    onAuthStateChanged(auth, (user) => {
+        isAdmin = user && user.email === ADMIN_EMAIL;
+        document.getElementById('btn-write').classList.toggle('hidden', !isAdmin);
+        document.getElementById('btn-logout').classList.toggle('hidden', !isAdmin);
+        document.getElementById('btn-admin-view').classList.toggle('hidden', isAdmin);
+        fetchPosts();
     });
+
     initQuill();
 </script>
-
 </body>
 </html>
