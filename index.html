@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Guide Webzine - Font Restored</title>
+    <title>Game Guide Webzine - Premium View</title>
     <!-- CSS Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic&family=Nanum+Myeongjo&family=Noto+Sans+KR:wght@300;400;700&display=swap');
+        
         @font-face {
             font-family: 'NanumBarunGothic';
             src: url('https://cdn.jsdelivr.net/gh/nanumfont/nanumfont/NanumBarunGothic.woff') format('woff');
@@ -20,6 +21,20 @@
         @font-face {
             font-family: 'MaruBuri';
             src: url('https://cdn.jsdelivr.net/gh/fontsource/maru-buri/fonts/maru-buri-korean-400-normal.woff2') format('woff2');
+        }
+
+        /* 공통 스타일 */
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f2f4f7;
+            color: #333;
+        }
+
+        /* 컨테이너 가로폭 780px 고정 */
+        .max-content-width {
+            max-width: 780px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         /* Quill 서체 클래스 정의 */
@@ -30,71 +45,117 @@
         .ql-font-nanumsquare { font-family: 'NanumSquare', sans-serif; }
         .ql-font-maruburi { font-family: 'MaruBuri', serif; }
 
-        body {
-            font-family: 'Pretendard', sans-serif;
-            background-color: #f8f9fa;
-        }
-
+        /* 에디터 높이 및 스타일 */
         #editor-container {
-            height: 600px;
+            height: 500px;
             background: white;
-            border-bottom-left-radius: 8px;
-            border-bottom-right-radius: 8px;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
         }
         
         .ql-toolbar {
             background: #ffffff;
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
             border-color: #e5e7eb !important;
-            padding: 12px !important;
         }
 
-        .ql-editor {
-            text-align: left; 
-            font-family: 'Nanum Gothic', sans-serif;
-            font-size: 11pt;
-            line-height: 1.6;
+        /* 상세 보기 뷰어 스타일 (image_ca8d20 참고) */
+        .post-viewer {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
-        /* 이미지 리사이징 스타일 */
-        .ql-editor img {
+        .post-header {
+            padding: 32px 32px 20px 32px;
+        }
+
+        .category-path {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .post-title {
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 20px;
+            color: #111;
+        }
+
+        .author-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            background: #e5e7eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .author-details {
+            flex: 1;
+        }
+
+        .author-name {
+            font-weight: 700;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .post-meta-sub {
+            font-size: 13px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        .content-area {
+            padding: 0 32px 40px 32px;
+            line-height: 1.8;
+            font-size: 16px;
+        }
+
+        .content-area img {
             max-width: 100%;
-            cursor: pointer;
+            height: auto;
+            border-radius: 8px;
+            margin: 24px 0;
         }
 
-        /* 툴바 드롭다운 한글 레이블 설정 */
+        /* 툴바 드롭다운 레이블 복구 */
         .ql-snow .ql-picker.ql-font .ql-picker-label::before,
         .ql-snow .ql-picker.ql-font .ql-picker-item::before { content: '서체선택'; }
-        
         .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="nanumgothic"]::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="nanumgothic"]::before { content: '나눔고딕'; font-family: 'Nanum Gothic'; }
-        
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="nanumgothic"]::before { content: '나눔고딕'; }
         .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="nanummyeongjo"]::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="nanummyeongjo"]::before { content: '나눔명조'; font-family: 'Nanum Myeongjo'; }
-        
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="nanummyeongjo"]::before { content: '나눔명조'; }
         .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="nanumbarungothic"]::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="nanumbarungothic"]::before { content: '나눔바른고딕'; font-family: 'NanumBarunGothic'; }
-        
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="nanumbarungothic"]::before { content: '나눔바른고딕'; }
         .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="nanumsquare"]::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="nanumsquare"]::before { content: '나눔스퀘어'; font-family: 'NanumSquare'; }
-        
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="nanumsquare"]::before { content: '나눔스퀘어'; }
         .ql-snow .ql-picker.ql-font .ql-picker-label[data-value="maruburi"]::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="maruburi"]::before { content: '마루부리'; font-family: 'MaruBuri'; }
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value="maruburi"]::before { content: '마루부리'; }
 
-        .ql-snow .ql-picker.ql-size .ql-picker-label::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item::before { content: attr(data-value) !important; }
-        .ql-snow .ql-picker.ql-size .ql-picker-label:not([data-value])::before { content: '11pt' !important; }
-
-        .content-area { text-align: left; word-break: break-all; }
-        .content-area img { max-width: 100%; height: auto; margin: 15px 0; }
-
-        #loading-overlay, #modal-login {
+        /* 로딩 애니메이션 */
+        #loading-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 9999;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 10000;
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -104,59 +165,100 @@
 <body>
 
 <div id="loading-overlay">
-    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
-    <p id="loading-text" class="mt-4 font-bold text-white">처리 중...</p>
+    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-green-600"></div>
+    <p id="loading-text" class="mt-4 font-medium text-gray-600">불러오는 중...</p>
 </div>
 
-<div id="modal-login">
-    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm">
-        <h2 class="text-2xl font-bold mb-2 text-center text-gray-800">관리자 인증</h2>
-        <input type="password" id="admin-password" placeholder="비밀번호" class="w-full p-4 border border-gray-200 rounded-xl mb-6 outline-none focus:ring-2 focus:ring-green-500">
-        <div class="flex gap-3">
-            <button onclick="closeLoginModal()" class="flex-1 py-3 bg-gray-100 rounded-xl font-bold">취소</button>
-            <button id="btn-do-login" class="flex-1 py-3 bg-green-600 text-white rounded-xl font-bold">확인</button>
+<div id="app" class="pb-20">
+    <!-- 헤더 -->
+    <header class="bg-white border-b sticky top-0 z-50 mb-8">
+        <div class="max-content-width px-4 h-16 flex justify-between items-center">
+            <h1 class="text-2xl font-black tracking-tighter text-gray-900 cursor-pointer" id="logo">
+                🎮 GAME <span class="text-green-600 font-normal">GUIDE</span>
+            </h1>
+            <div class="flex items-center gap-4">
+                <button id="btn-admin-view" class="text-xs font-bold text-gray-400 hover:text-black">ADMIN</button>
+                <button id="btn-write" class="hidden bg-green-600 text-white px-4 py-2 rounded-full font-bold text-sm shadow-sm">공략 쓰기</button>
+                <button id="btn-logout" class="hidden text-xs text-red-400 font-bold">LOGOUT</button>
+            </div>
         </div>
-    </div>
-</div>
-
-<div id="app" class="max-w-5xl mx-auto px-4 py-8">
-    <header class="flex justify-between items-center mb-8 border-b pb-6">
-        <h1 class="text-3xl font-bold text-gray-800 cursor-pointer" id="logo">🎮 GAME <span class="text-green-600">GUIDE</span></h1>
-        <nav class="flex gap-3">
-            <button id="btn-admin-view" class="bg-gray-800 text-white px-5 py-2 rounded-full font-bold text-sm shadow-sm hover:bg-black">ADMIN</button>
-            <button id="btn-write" class="hidden bg-green-600 text-white px-5 py-2 rounded-full font-bold text-sm shadow-md hover:bg-green-700">공략 쓰기</button>
-            <button id="btn-logout" class="hidden text-gray-400 hover:text-red-500 text-sm font-bold ml-2">로그아웃</button>
-        </nav>
     </header>
 
-    <section id="view-list" class="view">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="post-grid"></div>
-    </section>
+    <!-- 목록 뷰 -->
+    <main id="view-list" class="view max-content-width px-4">
+        <div class="grid grid-cols-1 gap-4" id="post-grid">
+            <!-- 카드 형태의 목록 -->
+        </div>
+    </main>
 
-    <section id="view-detail" class="view hidden">
-        <button id="btn-back-list" class="mb-6 text-gray-500 hover:text-black font-medium">← 목록으로 돌아가기</button>
-        <article class="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
-            <h2 id="detail-title" class="text-3xl font-bold mb-4"></h2>
-            <div id="detail-meta" class="text-sm text-gray-400 mb-8 pb-4 border-b"></div>
-            <div id="detail-content" class="content-area"></div>
-            <div id="admin-actions" class="hidden mt-10 pt-6 border-t flex gap-4">
-                <button id="btn-edit-post" class="text-blue-600 font-bold">수정하기</button>
-                <button id="btn-delete-post" class="text-red-500 font-bold">삭제하기</button>
+    <!-- 상세 보기 뷰 (image_ca8d20 디자인) -->
+    <main id="view-detail" class="view hidden max-content-width px-4">
+        <button id="btn-back-list" class="mb-4 text-sm text-gray-400 hover:text-black">← 목록</button>
+        
+        <article class="post-viewer">
+            <div class="post-header">
+                <div class="category-path">
+                    콜라보 플레이 인증 이벤트 <span class="text-gray-300">›</span>
+                </div>
+                <h2 id="detail-title" class="post-title"></h2>
+                
+                <div class="flex justify-between items-end">
+                    <div class="author-info">
+                        <div class="author-avatar">🦉</div>
+                        <div class="author-details">
+                            <div class="author-name">은빛독수리 <span class="text-[10px] bg-gray-100 text-gray-500 px-1 rounded ml-1">LV 15</span></div>
+                            <div class="post-meta-sub">
+                                <span id="detail-date"></span> · 조회 <span id="detail-views">0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 cursor-pointer hover:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 cursor-pointer hover:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" /></svg>
+                    </div>
+                </div>
+            </div>
+
+            <div id="detail-content" class="content-area ql-editor">
+                <!-- 본문 내용 -->
+            </div>
+            
+            <div class="px-8 pb-8 flex justify-between items-center text-xs text-gray-300 border-t pt-6 mx-8">
+                <div id="detail-uid">uid : 394296475</div>
+                <div id="admin-controls" class="hidden flex gap-3">
+                    <button id="btn-edit-post" class="text-blue-500 font-bold underline">수정</button>
+                    <button id="btn-delete-post" class="text-red-400 font-bold underline">삭제</button>
+                </div>
             </div>
         </article>
-    </section>
+    </main>
 
-    <section id="view-write" class="view hidden">
-        <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-            <input type="text" id="post-title" placeholder="제목을 입력하세요" class="w-full text-2xl font-bold mb-6 p-2 border-b-2 border-gray-100 focus:border-green-500 outline-none transition-all">
+    <!-- 작성 뷰 -->
+    <main id="view-write" class="view hidden max-content-width px-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-6 border-b">
+                <input type="text" id="post-title" placeholder="제목을 입력하세요" class="w-full text-2xl font-bold outline-none">
+            </div>
             <div id="editor-container"></div>
             <input type="file" id="image-input" class="hidden" accept="image/*">
-            <div class="mt-8 flex justify-end gap-3">
-                <button id="btn-cancel-write" class="px-6 py-2 text-gray-500 font-bold">취소</button>
-                <button id="btn-save-post" class="px-10 py-2 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-all">발행하기</button>
+            <div class="p-6 bg-gray-50 flex justify-end gap-3">
+                <button id="btn-cancel-write" class="px-6 py-2 text-gray-400 font-bold">취소</button>
+                <button id="btn-save-post" class="px-8 py-2 bg-green-600 text-white font-bold rounded-xl">발행하기</button>
             </div>
         </div>
-    </section>
+    </main>
+</div>
+
+<!-- 로그인 모달 -->
+<div id="modal-login" class="fixed inset-0 bg-black/60 hidden z-[100] flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl">
+        <h3 class="text-xl font-bold mb-6 text-center">관리자 인증</h3>
+        <input type="password" id="admin-password" placeholder="비밀번호를 입력하세요" class="w-full p-4 bg-gray-50 border-none rounded-2xl mb-4 outline-none focus:ring-2 focus:ring-green-500">
+        <div class="flex gap-2">
+            <button onclick="document.getElementById('modal-login').style.display='none'" class="flex-1 py-4 font-bold text-gray-400">닫기</button>
+            <button id="btn-do-login" class="flex-1 py-4 bg-green-600 text-white rounded-2xl font-bold">인증하기</button>
+        </div>
+    </div>
 </div>
 
 <!-- Scripts -->
@@ -165,7 +267,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, orderBy, query, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -186,28 +288,22 @@
     let quill;
     let currentPostId = null;
 
-    // --- Quill 서체 및 크기 화이트리스트 등록 ---
+    // --- Quill 초기화 및 서체 등록 ---
     const Font = Quill.import('formats/font');
     Font.whitelist = ['nanumgothic', 'nanummyeongjo', 'nanumbarungothic', 'nanumsquare', 'maruburi'];
     Quill.register(Font, true);
 
-    const Size = Quill.import('attributors/style/size');
-    Size.whitelist = ['11pt', '13pt', '15pt', '16pt', '19pt', '24pt', '28pt', '30pt', '34pt', '38pt'];
-    Quill.register(Size, true);
-
     function initQuill() {
         quill = new Quill('#editor-container', {
             theme: 'snow',
-            placeholder: '공략 내용을 작성해 주세요...',
             modules: {
                 toolbar: {
                     container: [
                         [{ 'font': Font.whitelist }],
-                        [{ 'size': Size.whitelist }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'align': [] }],
-                        ['image', 'link', 'blockquote'],
+                        [{ 'size': ['11pt', '13pt', '16pt', '19pt', '24pt'] }],
+                        ['bold', 'italic', 'underline'],
+                        [{ 'color': [] }, { 'align': [] }],
+                        ['image', 'blockquote', 'code-block'],
                         ['clean']
                     ],
                     handlers: { image: imageHandler }
@@ -215,107 +311,112 @@
                 imageResize: { displaySize: true }
             }
         });
-
-        // 초기 서체/크기 기본값 설정
         quill.format('font', 'nanumgothic');
-        quill.format('size', '11pt');
     }
 
     async function imageHandler() {
         const input = document.getElementById('image-input');
-        input.value = "";
         input.click();
         input.onchange = () => {
             const file = input.files[0];
-            if (!file) return;
-            if (file.size > 1024 * 1024) return alert("이미지 용량이 너무 큽니다 (1MB 제한).");
-            
-            showLoading(true, "이미지 처리 중...");
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const range = quill.getSelection(true);
-                quill.insertEmbed(range.index, 'image', e.target.result);
-                quill.setSelection(range.index + 1);
-                showLoading(false);
-            };
-            reader.readAsDataURL(file);
+            if (file && file.size < 1.5 * 1024 * 1024) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const range = quill.getSelection(true);
+                    quill.insertEmbed(range.index, 'image', e.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else { alert("1.5MB 이하의 이미지만 가능합니다."); }
         };
-    }
-
-    function showLoading(show, text = "") {
-        document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
-        document.getElementById('loading-text').innerText = text;
     }
 
     window.showView = (name) => {
         document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
         document.getElementById(`view-${name}`).classList.remove('hidden');
+        window.scrollTo(0, 0);
         if (name === 'list') fetchPosts();
     };
 
     async function fetchPosts() {
         const grid = document.getElementById('post-grid');
         grid.innerHTML = '';
-        const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
-        const snap = await getDocs(q);
-        snap.forEach(d => {
-            const p = d.data();
-            const card = document.createElement('div');
-            card.className = "bg-white p-6 rounded-xl shadow-sm border border-gray-100 cursor-pointer hover:shadow-md transition-all";
-            card.onclick = () => {
-                currentPostId = d.id;
-                document.getElementById('detail-title').innerText = p.title;
-                document.getElementById('detail-content').innerHTML = p.content;
-                document.getElementById('detail-meta').innerText = `관리자 | ${p.date || ''}`;
-                document.getElementById('admin-actions').classList.toggle('hidden', !isAdmin);
-                showView('detail');
-            };
-            card.innerHTML = `
-                <h3 class="font-bold text-lg mb-4 line-clamp-2 text-gray-800">${p.title}</h3>
-                <div class="flex items-center justify-between text-xs text-gray-400">
-                    <span>${p.date || ''}</span>
-                    <span class="text-green-600 font-bold uppercase">Guide</span>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
+        showLoading(true);
+        try {
+            const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'));
+            const snap = await getDocs(q);
+            snap.forEach(d => {
+                const p = d.data();
+                const card = document.createElement('div');
+                card.className = "bg-white p-6 rounded-2xl border border-gray-100 cursor-pointer hover:border-green-200 transition-all";
+                card.onclick = () => openDetail(d.id, p);
+                card.innerHTML = `
+                    <div class="text-[11px] text-green-600 font-bold mb-2">GUIDE</div>
+                    <h3 class="font-bold text-lg text-gray-800 line-clamp-1">${p.title}</h3>
+                    <div class="mt-4 flex justify-between items-center text-xs text-gray-400">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-gray-600">은빛독수리</span>
+                            <span>${p.date || ''}</span>
+                        </div>
+                        <div>조회 ${p.views || 0}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        } finally { showLoading(false); }
     }
 
+    async function openDetail(id, p) {
+        currentPostId = id;
+        document.getElementById('detail-title').innerText = p.title;
+        document.getElementById('detail-content').innerHTML = p.content;
+        document.getElementById('detail-date').innerText = p.date || '';
+        document.getElementById('detail-views').innerText = (p.views || 0) + 1;
+        document.getElementById('admin-controls').classList.toggle('hidden', !isAdmin);
+        showView('detail');
+        
+        // 조회수 증가 (비동기)
+        updateDoc(doc(db, 'posts', id), { views: increment(1) });
+    }
+
+    function showLoading(show) {
+        document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
+    }
+
+    // 버튼 이벤트
     document.getElementById('btn-save-post').onclick = async () => {
         const title = document.getElementById('post-title').value;
         const content = quill.root.innerHTML;
-        if (!title || quill.getText().trim().length < 2) return alert("내용을 채워주세요.");
-
-        showLoading(true, "저장 중...");
+        if (!title) return alert("제목을 입력하세요.");
+        
+        showLoading(true);
         try {
-            const data = { title, content, updatedAt: serverTimestamp() };
             if (currentPostId) {
-                await updateDoc(doc(db, 'posts', currentPostId), data);
+                await updateDoc(doc(db, 'posts', currentPostId), { title, content, updatedAt: serverTimestamp() });
             } else {
-                data.createdAt = serverTimestamp();
-                data.date = new Date().toLocaleDateString('ko-KR');
-                await addDoc(collection(db, 'posts'), data);
+                await addDoc(collection(db, 'posts'), {
+                    title, content, views: 0, author: "은빛독수리",
+                    date: new Date().toLocaleDateString('ko-KR'),
+                    createdAt: serverTimestamp()
+                });
             }
             showView('list');
-        } catch (e) { alert("저장 실패"); }
-        finally { showLoading(false); }
+        } finally { showLoading(false); }
     };
 
     document.getElementById('btn-admin-view').onclick = () => document.getElementById('modal-login').style.display = 'flex';
-    window.closeLoginModal = () => document.getElementById('modal-login').style.display = 'none';
     document.getElementById('btn-do-login').onclick = async () => {
+        const pw = document.getElementById('admin-password').value;
         try {
-            await signInWithEmailAndPassword(auth, ADMIN_EMAIL, document.getElementById('admin-password').value);
-            closeLoginModal();
-        } catch (e) { alert("비밀번호가 틀렸습니다."); }
+            await signInWithEmailAndPassword(auth, ADMIN_EMAIL, pw);
+            document.getElementById('modal-login').style.display = 'none';
+        } catch (e) { alert("인증 실패"); }
     };
+
     document.getElementById('btn-logout').onclick = () => signOut(auth);
     document.getElementById('btn-write').onclick = () => {
         currentPostId = null;
         document.getElementById('post-title').value = '';
         quill.setContents([]);
-        quill.format('font', 'nanumgothic');
-        quill.format('size', '11pt');
         showView('write');
     };
     document.getElementById('btn-edit-post').onclick = () => {
@@ -329,6 +430,7 @@
             showView('list');
         }
     };
+    
     document.getElementById('btn-back-list').onclick = () => showView('list');
     document.getElementById('btn-cancel-write').onclick = () => showView('list');
     document.getElementById('logo').onclick = () => showView('list');
