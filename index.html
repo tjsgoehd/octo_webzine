@@ -172,7 +172,8 @@
     // Image Upload
     async function imageHandler() {
         if (!currentUser) {
-            alert("로그인 세션이 유효하지 않습니다. 다시 시도해 주세요.");
+            alert("로그인 세션이 유효하지 않습니다. 잠시만 기다려 주세요.");
+            await signInAnonymously(auth);
             return;
         }
         
@@ -184,11 +185,12 @@
             const file = input.files[0];
             if (!file) return;
 
-            showLoading(true, "업로드 시작 중...");
+            showLoading(true, "이미지 업로드 중 (0%)");
             try {
                 const timestamp = Date.now();
                 const safeName = file.name.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
-                // 경로: /artifacts/{appId}/public/data/images/...
+                
+                // Storage 규칙의 match 경로와 정확히 일치해야 합니다: /artifacts/{appId}/public/data/...
                 const storagePath = `artifacts/${appId}/public/data/images/${timestamp}_${safeName}`;
                 const storageRef = ref(storage, storagePath);
                 
@@ -200,8 +202,8 @@
                         updateLoadingText(`업로드 진행률: ${Math.round(progress)}%`);
                     }, 
                     (error) => {
-                        console.error("Storage Error:", error);
-                        alert(`업로드 실패: ${error.code}\n파이어베이스 Storage 규칙이 올바른지 확인하세요.`);
+                        console.error("Storage Error Details:", error);
+                        alert(`업로드 실패: ${error.code}\n파이어베이스 Storage 규칙 탭에서 규칙이 정상적으로 '게시'되었는지 확인하세요.`);
                         showLoading(false);
                     }, 
                     async () => {
@@ -225,6 +227,7 @@
         const grid = document.getElementById('post-grid');
         grid.innerHTML = '';
         try {
+            // Firestore 규칙의 match 경로와 일치: /artifacts/{appId}/public/data/posts
             const postsRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
             const q = query(postsRef, orderBy('createdAt', 'desc'));
             const snapshot = await getDocs(q);
@@ -249,8 +252,11 @@
                 `;
                 grid.appendChild(div);
             });
-        } catch (err) { console.error(err); }
-        finally { showLoading(false); }
+        } catch (err) { 
+            console.error("Firestore Fetch Error:", err); 
+        } finally { 
+            showLoading(false); 
+        }
     }
 
     // Event Listeners
@@ -274,8 +280,12 @@
             document.getElementById('post-title').value = '';
             quill.setContents([]);
             window.showView('list');
-        } catch (err) { alert("저장 실패"); console.error(err); }
-        finally { showLoading(false); }
+        } catch (err) { 
+            alert("저장 실패: Firestore 규칙을 확인하세요."); 
+            console.error(err); 
+        } finally { 
+            showLoading(false); 
+        }
     };
 
     // Initialize
@@ -285,7 +295,7 @@
             document.getElementById('btn-write').classList.remove('hidden');
             fetchPosts();
         } else {
-            signInAnonymously(auth);
+            signInAnonymously(auth).catch(err => console.error("Anonymous Auth Failed:", err));
         }
     });
     initQuill();
